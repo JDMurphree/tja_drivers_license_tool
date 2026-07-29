@@ -34,6 +34,9 @@
         { sel: "#idNumber", attr: "idNumber" },
         { sel: "#idStateDiv select", attr: "idStateCode", kind: "stateSelect" },
       ],
+      // The scanner's AIMsi output omits the name suffix, so offer one-click
+      // suffix entry into this field instead.
+      suffixField: "#sfx",
       // Fields intentionally NOT auto-filled (not derivable from a license):
       //   #ssn1-3 (SSN), #raceDiv (Race), #aka (AKA), #upin (IDT/UPIN),
       //   #ctzDiv (Citizenship — barcode carries issuing country, not citizenship),

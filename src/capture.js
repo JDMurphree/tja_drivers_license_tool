@@ -13,7 +13,7 @@
 
   let lastParsed = null;
   let customMapping = null;
-  let scanBox = null, statusEl = null; // widget refs
+  let scanBox = null, statusEl = null, suffixEl = null; // widget refs
 
   const owns = () => window.top === window || TJID.presets.detect();
   // Capture only runs where there's something to fill — the InstaCheck form
@@ -47,6 +47,38 @@
 
   const setStatus = (html) => { if (statusEl) statusEl.innerHTML = html; };
 
+  // One-click suffix entry — the scanner omits the suffix, so let staff tap it
+  // straight into the form's Suffix field instead of typing + hunting for it.
+  const SUFFIXES = ["Jr", "Sr", "II", "III", "IV", "V"];
+  function renderSuffixButtons(fieldSel) {
+    if (!suffixEl) return;
+    suffixEl.innerHTML = "";
+    const target = document.querySelector(fieldSel);
+    if (!target) { suffixEl.style.display = "none"; return; }
+    const label = document.createElement("span");
+    label.textContent = "Suffix:";
+    label.style.cssText = "font-size:12px;font-weight:600;margin-right:2px";
+    suffixEl.appendChild(label);
+    SUFFIXES.forEach((sfx) => {
+      const b = document.createElement("button");
+      b.textContent = sfx;
+      b.type = "button";
+      b.style.cssText =
+        "padding:3px 9px;border:1px solid #3a5a2a;border-radius:6px;background:#fff;color:#2b2b2b;" +
+        "font:12px -apple-system,Segoe UI,Roboto,sans-serif;cursor:pointer";
+      b.addEventListener("click", () => {
+        TJID.fill.setText(target, sfx);
+        Array.from(suffixEl.querySelectorAll("button")).forEach((x) => {
+          x.style.background = "#fff"; x.style.color = "#2b2b2b";
+        });
+        b.style.background = "#3a5a2a"; b.style.color = "#f5f1e6";
+      });
+      suffixEl.appendChild(b);
+    });
+    suffixEl.style.display = "flex";
+  }
+  const hideSuffixButtons = () => { if (suffixEl) suffixEl.style.display = "none"; };
+
   // ---- Fill ----------------------------------------------------------------
   function fillFromData(data) {
     const preset = TJID.presets.detect();
@@ -59,10 +91,15 @@
     const r = TJID.fill.applyFields(fields, data);
     const name = data.fullName || "(no name)";
 
+    const canTapSuffix = data._suffixUnavailable && preset && preset.suffixField;
     let s = `✓ <b>${name}</b><br>${data.dobUS || "?"} · ${r.filled.length} fields filled`;
-    if (data._suffixUnavailable) s += `<div style="color:#9a5b00;margin-top:6px">⚠ Add suffix by hand (Jr/III/etc.) if the ID has one.</div>`;
+    if (canTapSuffix) s += `<div style="color:#9a5b00;margin-top:6px">⚠ Suffix isn't scanned — tap one below if the ID has it.</div>`;
+    else if (data._suffixUnavailable) s += `<div style="color:#9a5b00;margin-top:6px">⚠ Add suffix by hand (Jr/III/etc.) if the ID has one.</div>`;
     if (r.missing.length) s += `<div style="opacity:.7;margin-top:4px">${r.missing.length} field(s) not found on page.</div>`;
     setStatus(s);
+
+    if (canTapSuffix) renderSuffixButtons(preset.suffixField);
+    else hideSuffixButtons();
 
     // The widget shows this status; only fall back to a toast if it's absent.
     if (!statusEl) {
@@ -111,10 +148,13 @@
           'background:rgba(255,255,255,.96);font:13px monospace" />' +
         '<div id="tjid-status" style="margin-top:8px;padding:8px 10px;border-radius:8px;font-size:12.5px;' +
           'background:rgba(245,241,230,.88);box-shadow:0 1px 3px rgba(0,0,0,.16)">Ready — click the box, then scan a license.</div>' +
+        '<div id="tjid-suffix" style="margin-top:7px;display:none;align-items:center;flex-wrap:wrap;gap:5px;' +
+          'padding:6px 8px;border-radius:8px;background:rgba(245,241,230,.88);box-shadow:0 1px 3px rgba(0,0,0,.16)"></div>' +
       '</div>';
     document.documentElement.appendChild(w);
     scanBox = w.querySelector("#tjid-scanbox");
     statusEl = w.querySelector("#tjid-status");
+    suffixEl = w.querySelector("#tjid-suffix");
 
     // Scan-into-box: the whole burst types in; debounce, parse, fill, clear.
     let t = null;
