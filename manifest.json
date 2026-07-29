@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Triple J ID Autofill",
+  "version": "0.1.0",
+  "description": "Fills logged-in vendor forms (e.g. ATF eForms) from a driver's-license PDF417 scan using a keyboard-wedge scanner.",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": ["<all_urls>"],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ID Autofill",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "run_at": "document_idle",
+      "js": [
+        "src/aamva.js",
+        "src/states.js",
+        "src/aimsi.js",
+        "src/assets.js",
+        "src/presets.js",
+        "src/locate.js",
+        "src/fill.js",
+        "src/capture.js"
+      ]
+    }
+  ]
+}

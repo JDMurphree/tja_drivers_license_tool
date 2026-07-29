@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Raw Scanner Capture</title>
+  <style>
+    body { font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 40px auto; }
+    h1 { font-size: 20px; }
+    textarea { width: 100%; height: 320px; box-sizing: border-box; font: 13px monospace; padding: 10px; }
+    .step { background: #f5f1e6; border-left: 5px solid #3a5a2a; padding: 10px 14px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>Raw Scanner Capture</h1>
+  <div class="step">
+    <b>1.</b> Click inside the box below so the cursor is blinking in it.<br>
+    <b>2.</b> Scan the <b>back</b> of a real Colorado license (the PDF417 barcode).<br>
+    <b>3.</b> Leave it — Claude will read the exact contents from the page.
+  </div>
+  <textarea id="out" autofocus placeholder="Scan into here…"></textarea>
+  <!-- Intentionally NO scripts: this page must capture the scanner's raw output untouched. -->
+</body>
+</html>

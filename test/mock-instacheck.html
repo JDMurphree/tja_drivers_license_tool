@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MOCK InstaCheck — Autofill Test Harness</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 720px; margin: 20px auto; color: #222; }
+    h1 { font-size: 18px; } h2 { font-size: 15px; margin-top: 24px; }
+    .section { border: 1px solid #ccc; background: #eee; padding: 10px; margin: 8px 0; }
+    label { display: block; font-weight: 600; margin-top: 8px; }
+    input[type=text] { width: 100%; box-sizing: border-box; padding: 4px; }
+    .ctr input { width: 60px; }
+    select { padding: 4px; }
+    .tools { background: #f5f1e6; border: 1px solid #c9c0a4; padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+    button { padding: 8px 14px; cursor: pointer; }
+    textarea { width: 100%; height: 90px; box-sizing: border-box; font: 12px monospace; }
+    .note { font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>MOCK InstaCheck — Autofill Test Harness</h1>
+  <p class="note">This page mimics the real InstaCheck field IDs so you can verify parsing + filling
+  locally, without logging into the state system. It loads the same extension code directly.</p>
+
+  <div class="tools">
+    <b>Test</b>
+    <p><button id="simScan">▶ Simulate a wedge scan (sample CO license)</button>
+       <span class="note">dispatches keystrokes exactly like your scanner would.</span></p>
+    <label>…or paste raw scanner output and parse directly:</label>
+    <textarea id="raw">AIMsi|1.0|002070974|7422 E EASTER WAY||USA|80112-0000|CO|CENTENNIAL|JAMES|DENNIS|MURPHREE|07/09/1985|07/09/2031|235|74|1|BRO|BRO|U||</textarea>
+    <p><button id="parseRaw">Parse &amp; fill from textarea</button></p>
+  </div>
+
+  <form id="application">
+    <div class="section">
+      <b>Applicant Information</b>
+      <label>First Name *</label><input id="fna" type="text" />
+      <label>Middle Name * (if none "NMN")</label><input id="mna" type="text" />
+      <label>Last Name *</label><input id="lna" type="text" />
+      <label>Suffix</label><input id="sfx" type="text" />
+      <label>AKA</label><input id="aka" type="text" />
+      <label>Sex *</label>
+      <div id="genderDiv"><select><option value=""></option><option>Male</option><option>Female</option></select></div>
+      <label>Race *</label>
+      <div id="raceDiv"><select><option value=""></option><option>White</option><option>Black</option></select></div>
+      <label>Social Security Number</label>
+      <div class="ctr"><input id="ssn1" type="text" maxlength="3"> - <input id="ssn2" type="text" maxlength="2"> - <input id="ssn3" type="text" maxlength="4"></div>
+      <label>Date of Birth *</label>
+      <div class="ctr"><input id="dobM" type="text" maxlength="2" placeholder="MM"> / <input id="dobD" type="text" maxlength="2" placeholder="DD"> / <input id="dobY" type="text" maxlength="4" placeholder="YYYY"></div>
+      <label>Number and Street Address *</label><input id="adr" type="text" />
+      <label>City *</label><input id="cty" type="text" />
+      <label>State *</label>
+      <div id="stateDiv"><select><option value=""></option><option value="CA">California</option><option value="CO">Colorado</option><option value="TX">Texas</option></select></div>
+      <label>Zip Code *</label><input id="zip" type="text" />
+      <label>ID Number / State *</label>
+      <input id="idNumber" type="text" />
+      <div id="idStateDiv" style="display:inline"><select><option value=""></option><option value="CA">California</option><option value="CO">Colorado</option><option value="TX">Texas</option></select></div>
+      <label>UPIN</label><input id="upin" type="text" />
+      <label>Country of Citizenship *</label>
+      <div id="ctzDiv"><select><option value=""></option><option>United States</option><option>Canada</option><option>Mexico</option></select></div>
+    </div>
+  </form>
+
+  <!-- Load the extension source directly (same order as manifest.json). -->
+  <script src="../src/aamva.js"></script>
+  <script src="../src/states.js"></script>
+  <script src="../src/aimsi.js"></script>
+  <script src="../src/assets.js"></script>
+  <script src="../src/presets.js"></script>
+  <script src="../src/locate.js"></script>
+  <script src="../src/fill.js"></script>
+  <script src="../src/capture.js"></script>
+
+  <script>
+    // Simulate the scanner by dispatching keydown events, char by char.
+    document.getElementById("simScan").onclick = () => {
+      const raw = document.getElementById("raw").value;
+      for (const ch of raw) {
+        const key = ch === "\n" ? "Enter" : ch;
+        document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+      }
+      // (capture.js finalizes on its own ~160ms gap timer)
+    };
+
+    // Direct parse path (bypasses keystroke capture) for quick checks.
+    document.getElementById("parseRaw").onclick = () => {
+      const raw = document.getElementById("raw").value;
+      const parser = window.TJID.aimsi.looksLikeScan(raw) ? window.TJID.aimsi : window.TJID.aamva;
+      const { data } = parser.parse(raw);
+      const preset = window.TJID.presets.detect();
+      const report = window.TJID.fill.applyFields(preset.fields, data);
+      console.log("Parsed license:", data);
+      console.log("Fill report:", report);
+    };
+  </script>
+</body>
+</html>

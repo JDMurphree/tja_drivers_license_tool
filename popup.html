@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { width: 300px; margin: 0; font: 13px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; color: #2b2b2b; background: #f5f1e6; }
+    header { background: #3a5a2a; color: #f5f1e6; padding: 12px 14px; font-weight: 700; }
+    .body { padding: 12px 14px; }
+    .row { margin-bottom: 10px; }
+    .k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; opacity: .6; }
+    .v { font-weight: 600; }
+    button { width: 100%; padding: 9px 10px; margin-top: 6px; border: 1px solid #c9c0a4; background: #ece5d0; border-radius: 6px; cursor: pointer; font: inherit; }
+    button:hover { background: #e0d8bd; }
+    button.primary { background: #3a5a2a; color: #f5f1e6; border-color: #3a5a2a; }
+    button.primary:hover { background: #33501f; }
+    .hint { font-size: 11px; opacity: .7; margin-top: 8px; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .ok { background: #d7e6cc; color: #3a5a2a; }
+    .no { background: #eee0d6; color: #9a4a2a; }
+  </style>
+</head>
+<body>
+  <header>Triple J ID Autofill</header>
+  <div class="body">
+    <div class="row"><div class="k">Page</div><div class="v" id="host">…</div></div>
+    <div class="row"><div class="k">Field map</div><div class="v" id="map">…</div></div>
+    <div class="row"><div class="k">Last scan</div><div class="v" id="last">— none yet —</div></div>
+
+    <button class="primary" id="fill">Fill from last scan</button>
+    <button id="teach">Teach fields on this page</button>
+    <button id="clear">Clear taught mapping</button>
+
+    <div class="hint">Scan a license anywhere on the page and it fills automatically. Use “Teach” only for pages without a built-in map.</div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
